@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2025-10-09
+
+### Changed
+- **Documentation**: Updated README with comprehensive TypeScript examples and CLI usage
+- **Examples**: Added TypeScript output examples showing both .js and .ts file generation
+- **Clarity**: Enhanced documentation to better showcase v2.0.0 TypeScript features
+
 ## [2.0.0] - 2025-10-09
 
 ### Added
