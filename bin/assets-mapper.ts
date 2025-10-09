@@ -1,14 +1,21 @@
 #!/usr/bin/env node
-'use strict';
-var __importDefault =
-  (this && this.__importDefault) ||
-  function (mod) {
-    return mod && mod.__esModule ? mod : { default: mod };
-  };
-Object.defineProperty(exports, '__esModule', { value: true });
-const minimist_1 = __importDefault(require('minimist'));
-const generator_js_1 = require('../lib/generator.js');
-const args = (0, minimist_1.default)(process.argv.slice(2));
+import minimist from 'minimist';
+import { generateAssetsMap, watchAssetsMap } from '../lib/generator.js';
+
+interface CliArgs {
+  _: string[];
+  src?: string;
+  out?: string;
+  public?: boolean;
+  watch?: boolean;
+  w?: boolean;
+  exts?: string;
+  help?: boolean;
+  h?: boolean;
+}
+
+const args = minimist(process.argv.slice(2)) as CliArgs;
+
 function showHelp() {
   console.log(`
 Assets Mapper - Generate typed asset maps for React/Next.js projects
@@ -35,15 +42,18 @@ Examples:
   assets-mapper --src ./assets --out ./src/assetsMap.js --exts png,svg,jpg
 `);
 }
+
 if (args.help || args.h) {
   showHelp();
   process.exit(0);
 }
+
 if (!args.src || !args.out) {
   console.error('Error: Both --src and --out arguments are required\n');
   showHelp();
   process.exit(1);
 }
+
 try {
   const options = {
     src: args.src,
@@ -55,27 +65,34 @@ try {
           .map(ext => ext.trim())
       : undefined,
   };
+
   // Generate initial assets map
-  const result = (0, generator_js_1.generateAssetsMap)(options);
+  const result = generateAssetsMap(options);
+
   console.log(`✅ Assets map generated successfully!`);
   console.log(`   Output: ${result.outputFile}`);
   console.log(`   Processed: ${result.totalFiles} files`);
+
   if (result.directories.length > 0) {
     console.log(`   Directories: ${result.directories.join(', ')}`);
   }
+
   if (result.duplicates.length > 0) {
     console.log(`   Duplicates: ${result.duplicates.join(', ')}`);
   }
+
   // Start watching if requested
   if (args.watch || args.w) {
     console.log('');
-    const watcher = (0, generator_js_1.watchAssetsMap)(options);
+    const watcher = watchAssetsMap(options);
+
     // Handle graceful shutdown
     process.on('SIGINT', () => {
       console.log('\n👋 Shutting down...');
       watcher.close();
       process.exit(0);
     });
+
     process.on('SIGTERM', () => {
       watcher.close();
       process.exit(0);
@@ -83,7 +100,7 @@ try {
   }
 } catch (error) {
   if (typeof error === 'object' && error && 'message' in error) {
-    console.error('❌ Error:', error.message);
+    console.error('❌ Error:', (error as any).message);
   } else {
     console.error('❌ Error:', String(error));
   }

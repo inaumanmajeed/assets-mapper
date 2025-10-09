@@ -1,12 +1,24 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-function sanitizeName(name) {
+export function sanitizeName(name: string): string {
   return name.replace(/[^a-zA-Z0-9_]/g, '_').replace(/^([0-9])/, '_$1');
 }
 
-function scanDirectoryRecursive(dir, exts, baseDir) {
-  const results = [];
+export interface AssetFile {
+  fullPath: string;
+  relativePath: string;
+  filename: string;
+  name: string;
+  directory: string;
+}
+
+export function scanDirectoryRecursive(
+  dir: string,
+  exts: string[],
+  baseDir: string
+): AssetFile[] {
+  const results: AssetFile[] = [];
   try {
     const items = fs.readdirSync(dir);
     for (const item of items) {
@@ -29,12 +41,35 @@ function scanDirectoryRecursive(dir, exts, baseDir) {
       }
     }
   } catch (error) {
-    console.warn(`Warning: Could not read directory ${dir}: ${error.message}`);
+    if (typeof error === 'object' && error && 'message' in error) {
+      console.warn(
+        `Warning: Could not read directory ${dir}: ${(error as any).message}`
+      );
+    } else {
+      console.warn(`Warning: Could not read directory ${dir}`);
+    }
   }
   return results;
 }
 
-function generateAssetsMap(options) {
+export interface GenerateAssetsMapOptions {
+  src: string;
+  out: string;
+  public?: boolean;
+  exts?: string[];
+}
+
+export interface GenerateAssetsMapResult {
+  outputFile: string;
+  processedFiles: string[];
+  totalFiles: number;
+  directories: string[];
+  duplicates: string[];
+}
+
+export function generateAssetsMap(
+  options: GenerateAssetsMapOptions
+): GenerateAssetsMapResult {
   if (!options || typeof options !== 'object') {
     throw new Error('Options object is required');
   }
@@ -82,17 +117,17 @@ function generateAssetsMap(options) {
   }
 
   // Find duplicates by filename (without extension)
-  const nameCount = {};
+  const nameCount: { [key: string]: number } = {};
   imageFiles.forEach(file => {
     nameCount[file.name] = (nameCount[file.name] || 0) + 1;
   });
 
-  const lines = [];
-  const mapEntries = [];
-  const exportNames = new Set();
+  const lines: string[] = [];
+  const mapEntries: string[] = [];
+  const exportNames: Set<string> = new Set();
 
   imageFiles.forEach(fileInfo => {
-    let exportName;
+    let exportName: string;
 
     // Only add folder prefix if there are duplicates
     if (nameCount[fileInfo.name] > 1) {
@@ -153,7 +188,11 @@ function generateAssetsMap(options) {
     fs.mkdirSync(path.dirname(out), { recursive: true });
     fs.writeFileSync(out, content, 'utf8');
   } catch (error) {
-    throw new Error(`Failed to write output file: ${error.message}`);
+    if (typeof error === 'object' && error && 'message' in error) {
+      throw new Error(`Failed to write output file: ${(error as any).message}`);
+    } else {
+      throw new Error(`Failed to write output file.`);
+    }
   }
 
   return {
@@ -163,17 +202,22 @@ function generateAssetsMap(options) {
     directories: [
       ...new Set(imageFiles.map(f => f.directory).filter(d => d !== '.')),
     ],
-    duplicates: Object.keys(nameCount).filter(name => nameCount[name] > 1),
+    duplicates: Object.keys(nameCount).filter(
+      name => nameCount[name] && nameCount[name] > 1
+    ),
   };
 }
 
-function watchAssetsMap(options, callback) {
-  let watcher;
+export function watchAssetsMap(
+  options: GenerateAssetsMapOptions,
+  callback?: (err: Error | null, result: GenerateAssetsMapResult | null) => void
+): { close: () => void } {
+  let watcher: fs.FSWatcher | undefined;
   try {
     watcher = fs.watch(
       options.src,
       { recursive: true },
-      (eventType, filename) => {
+      (eventType: string, filename: string | null) => {
         if (!filename) return;
         const ext = path.extname(filename).slice(1).toLowerCase();
         const defaultExts = [
@@ -198,14 +242,20 @@ function watchAssetsMap(options, callback) {
             console.log(
               `✅ Assets map updated! Processed ${result.totalFiles} files`
             );
-            if (callback && typeof callback === 'function') {
-              callback(null, result);
-            }
+            if (callback) callback(null, result);
           } catch (error) {
-            console.error(`❌ Error regenerating assets map: ${error.message}`);
-            if (callback && typeof callback === 'function') {
-              callback(error, null);
+            if (typeof error === 'object' && error && 'message' in error) {
+              console.error(
+                `❌ Error regenerating assets map: ${(error as any).message}`
+              );
+            } else {
+              console.error(`❌ Error regenerating assets map.`);
             }
+            if (callback)
+              callback(
+                error instanceof Error ? error : new Error('Unknown error'),
+                null
+              );
           }
         }
       }
@@ -223,11 +273,17 @@ function watchAssetsMap(options, callback) {
       },
     };
   } catch (error) {
-    throw new Error(`Failed to start file watcher: ${error.message}`);
+    if (typeof error === 'object' && error && 'message' in error) {
+      throw new Error(
+        `Failed to start file watcher: ${(error as any).message}`
+      );
+    } else {
+      throw new Error(`Failed to start file watcher.`);
+    }
   }
 }
 
-function cleanupAssetsMap(outputPath) {
+export function cleanupAssetsMap(outputPath: string): boolean {
   try {
     if (fs.existsSync(outputPath)) {
       fs.unlinkSync(outputPath);
@@ -236,11 +292,13 @@ function cleanupAssetsMap(outputPath) {
     }
     return false;
   } catch (error) {
-    console.warn(
-      `Warning: Could not cleanup assets map file: ${error.message}`
-    );
+    if (typeof error === 'object' && error && 'message' in error) {
+      console.warn(
+        `Warning: Could not cleanup assets map file: ${(error as any).message}`
+      );
+    } else {
+      console.warn(`Warning: Could not cleanup assets map file.`);
+    }
     return false;
   }
 }
-
-module.exports = { generateAssetsMap, watchAssetsMap, cleanupAssetsMap };

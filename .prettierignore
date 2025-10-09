@@ -1,6 +1,7 @@
 node_modules/
 lib/
 *.min.js
+*.d.ts
 *.md
 package-lock.json
 .git/

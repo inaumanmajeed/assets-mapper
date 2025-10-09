@@ -1,15 +1,6 @@
+const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-
-function copyDirSync(src, dest) {
-  if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
-  fs.readdirSync(src).forEach(f => {
-    const s = path.join(src, f);
-    const d = path.join(dest, f);
-    if (fs.statSync(s).isDirectory()) copyDirSync(s, d);
-    else fs.copyFileSync(s, d);
-  });
-}
 
 // Clean lib directory first
 const libDir = path.join(__dirname, 'lib');
@@ -17,18 +8,38 @@ if (fs.existsSync(libDir)) {
   fs.rmSync(libDir, { recursive: true, force: true });
 }
 
-// Copy src to lib
-copyDirSync(path.join(__dirname, 'src'), libDir);
-console.log('✅ Built to lib/');
+console.log('🔨 Compiling TypeScript...');
 
-// Verify required files exist
-const requiredFiles = ['index.js', 'generator.js'];
-requiredFiles.forEach(file => {
-  const filePath = path.join(libDir, file);
-  if (!fs.existsSync(filePath)) {
-    console.error(`❌ Missing required file: ${file}`);
-    process.exit(1);
+try {
+  // Compile TypeScript to lib
+  execSync('npx tsc', { stdio: 'inherit' });
+  console.log('✅ TypeScript compiled to lib/');
+
+  // Compile CLI TypeScript file to JavaScript
+  const binDir = path.join(__dirname, 'bin');
+  const cliTsFile = path.join(binDir, 'assets-mapper.ts');
+  const cliJsFile = path.join(binDir, 'assets-mapper.js');
+
+  if (fs.existsSync(cliTsFile)) {
+    execSync(
+      `npx tsc ${cliTsFile} --outDir ${binDir} --target ES2020 --module CommonJS --esModuleInterop --allowSyntheticDefaultImports --skipLibCheck`,
+      { stdio: 'inherit' }
+    );
+    console.log('✅ CLI compiled to JavaScript');
   }
-});
 
-console.log('✅ Build verification complete');
+  // Verify required files exist
+  const requiredFiles = ['index.js', 'generator.js'];
+  requiredFiles.forEach(file => {
+    const filePath = path.join(libDir, file);
+    if (!fs.existsSync(filePath)) {
+      console.error(`❌ Missing required file: ${file}`);
+      process.exit(1);
+    }
+  });
+
+  console.log('✅ Build verification complete');
+} catch (error) {
+  console.error('❌ TypeScript compilation failed:', error.message);
+  process.exit(1);
+}
