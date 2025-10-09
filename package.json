@@ -7,9 +7,12 @@
     "assets-mapper": "bin/assets-mapper.js"
   },
   "scripts": {
-    "build": "node build.js",
+    "build": "npm run format && node build.js",
+    "format": "prettier --write \"src/**/*.js\" \"bin/**/*.js\" \"*.js\"",
+    "format:check": "prettier --check \"src/**/*.js\" \"bin/**/*.js\" \"*.js\"",
     "prepublishOnly": "npm run build",
-    "preuninstall": "node -e \"const {cleanupAssetsMap} = require('./lib/generator.js'); const fs = require('fs'); if (fs.existsSync('src/assets-map.js')) cleanupAssetsMap('src/assets-map.js'); if (fs.existsSync('assets-map.js')) cleanupAssetsMap('assets-map.js');\""
+    "preuninstall": "node -e \"const {cleanupAssetsMap} = require('./lib/generator.js'); const fs = require('fs'); if (fs.existsSync('src/assets-map.js')) cleanupAssetsMap('src/assets-map.js'); if (fs.existsSync('assets-map.js')) cleanupAssetsMap('assets-map.js');\"",
+    "prepare": "husky"
   },
   "keywords": [
     "assets",
@@ -43,5 +46,15 @@
   ],
   "engines": {
     "node": ">=14.0.0"
+  },
+  "lint-staged": {
+    "*.js": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.3",
+    "prettier": "^3.6.2"
   }
 }

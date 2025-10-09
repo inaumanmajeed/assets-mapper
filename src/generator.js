@@ -1,8 +1,8 @@
-const fs = require("fs");
-const path = require("path");
+const fs = require('fs');
+const path = require('path');
 
 function sanitizeName(name) {
-  return name.replace(/[^a-zA-Z0-9_]/g, "_").replace(/^([0-9])/, "_$1");
+  return name.replace(/[^a-zA-Z0-9_]/g, '_').replace(/^([0-9])/, '_$1');
 }
 
 function scanDirectoryRecursive(dir, exts, baseDir) {
@@ -23,7 +23,7 @@ function scanDirectoryRecursive(dir, exts, baseDir) {
             relativePath,
             filename: item,
             name: path.parse(item).name,
-            directory: path.dirname(relativePath)
+            directory: path.dirname(relativePath),
           });
         }
       }
@@ -35,36 +35,50 @@ function scanDirectoryRecursive(dir, exts, baseDir) {
 }
 
 function generateAssetsMap(options) {
-  if (!options || typeof options !== "object") {
-    throw new Error("Options object is required");
+  if (!options || typeof options !== 'object') {
+    throw new Error('Options object is required');
   }
-  if (!options.src || typeof options.src !== "string") {
-    throw new Error("src directory is required and must be a string");
+  if (!options.src || typeof options.src !== 'string') {
+    throw new Error('src directory is required and must be a string');
   }
-  if (!options.out || typeof options.out !== "string") {
-    throw new Error("out file path is required and must be a string");
+  if (!options.out || typeof options.out !== 'string') {
+    throw new Error('out file path is required and must be a string');
   }
 
   const cwd = process.cwd();
   const src = path.resolve(cwd, options.src);
-  
+
   if (!fs.existsSync(src)) {
     throw new Error(`Source folder not found: ${src}`);
   }
-  
+
   const srcStats = fs.statSync(src);
   if (!srcStats.isDirectory()) {
     throw new Error(`Source path is not a directory: ${src}`);
   }
 
   const out = path.resolve(cwd, options.out);
-  const defaultExts = ["png", "jpg", "jpeg", "svg", "webp", "gif", "ico", "bmp", "tiff"];
+  const defaultExts = [
+    'png',
+    'jpg',
+    'jpeg',
+    'svg',
+    'webp',
+    'gif',
+    'ico',
+    'bmp',
+    'tiff',
+  ];
   const exts = (options.exts || defaultExts).map(e => e.toLowerCase());
 
   const imageFiles = scanDirectoryRecursive(src, exts, src);
 
   if (imageFiles.length === 0) {
-    console.warn(`No image files found in ${src} (including subdirectories) with extensions: ${exts.join(", ")}`);
+    console.warn(
+      `No image files found in ${src} (including subdirectories) with extensions: ${exts.join(
+        ', '
+      )}`
+    );
   }
 
   // Find duplicates by filename (without extension)
@@ -79,13 +93,13 @@ function generateAssetsMap(options) {
 
   imageFiles.forEach(fileInfo => {
     let exportName;
-    
+
     // Only add folder prefix if there are duplicates
     if (nameCount[fileInfo.name] > 1) {
       const dir = fileInfo.directory;
-      if (dir && dir !== ".") {
-        const dirParts = dir.split(path.sep).filter(part => part !== ".");
-        const dirName = dirParts.join("_");
+      if (dir && dir !== '.') {
+        const dirParts = dir.split(path.sep).filter(part => part !== '.');
+        const dirName = dirParts.join('_');
         exportName = sanitizeName(`${dirName}_${fileInfo.name}`);
       } else {
         exportName = sanitizeName(fileInfo.name);
@@ -105,37 +119,39 @@ function generateAssetsMap(options) {
 
     if (options.public) {
       try {
-        const publicDir = path.resolve(cwd, "public");
+        const publicDir = path.resolve(cwd, 'public');
         const relativePath = path.relative(publicDir, fileInfo.fullPath);
-        const route = "/" + relativePath.replace(/\\/g, "/");
+        const route = '/' + relativePath.replace(/\\/g, '/');
         lines.push(`export const ${exportName} = "${route}";`);
         mapEntries.push(`  ${exportName}`);
       } catch (error) {
-        const route = "/" + fileInfo.relativePath.replace(/\\/g, "/");
+        const route = '/' + fileInfo.relativePath.replace(/\\/g, '/');
         lines.push(`export const ${exportName} = "${route}";`);
         mapEntries.push(`  ${exportName}`);
       }
     } else {
       const relativePath = path.relative(path.dirname(out), fileInfo.fullPath);
-      const importPath = relativePath.startsWith(".") ? relativePath : `./${relativePath}`;
-      const normalizedPath = importPath.replace(/\\/g, "/");
+      const importPath = relativePath.startsWith('.')
+        ? relativePath
+        : `./${relativePath}`;
+      const normalizedPath = importPath.replace(/\\/g, '/');
       lines.push(`import ${exportName} from "${normalizedPath}";`);
       mapEntries.push(`  ${exportName}`);
     }
   });
 
-  lines.push("");
-  lines.push("const assetsMap = {");
-  lines.push(mapEntries.join(",\n"));
-  lines.push("};");
-  lines.push("");
-  lines.push("export default assetsMap;");
+  lines.push('');
+  lines.push('const assetsMap = {');
+  lines.push(mapEntries.join(',\n'));
+  lines.push('};');
+  lines.push('');
+  lines.push('export default assetsMap;');
 
-  const content = lines.join("\n");
+  const content = lines.join('\n');
 
   try {
     fs.mkdirSync(path.dirname(out), { recursive: true });
-    fs.writeFileSync(out, content, "utf8");
+    fs.writeFileSync(out, content, 'utf8');
   } catch (error) {
     throw new Error(`Failed to write output file: ${error.message}`);
   }
@@ -144,47 +160,67 @@ function generateAssetsMap(options) {
     outputFile: out,
     processedFiles: imageFiles.map(f => f.relativePath),
     totalFiles: imageFiles.length,
-    directories: [...new Set(imageFiles.map(f => f.directory).filter(d => d !== "."))],
-    duplicates: Object.keys(nameCount).filter(name => nameCount[name] > 1)
+    directories: [
+      ...new Set(imageFiles.map(f => f.directory).filter(d => d !== '.')),
+    ],
+    duplicates: Object.keys(nameCount).filter(name => nameCount[name] > 1),
   };
 }
 
 function watchAssetsMap(options, callback) {
   let watcher;
   try {
-    watcher = fs.watch(options.src, { recursive: true }, (eventType, filename) => {
-      if (!filename) return;
-      const ext = path.extname(filename).slice(1).toLowerCase();
-      const defaultExts = ["png", "jpg", "jpeg", "svg", "webp", "gif", "ico", "bmp", "tiff"];
-      const exts = (options.exts || defaultExts).map(e => e.toLowerCase());
-      
-      if (exts.includes(ext)) {
-        console.log(`🔄 Detected change in ${filename}, regenerating assets map...`);
-        try {
-          const result = generateAssetsMap(options);
-          console.log(`✅ Assets map updated! Processed ${result.totalFiles} files`);
-          if (callback && typeof callback === "function") {
-            callback(null, result);
-          }
-        } catch (error) {
-          console.error(`❌ Error regenerating assets map: ${error.message}`);
-          if (callback && typeof callback === "function") {
-            callback(error, null);
+    watcher = fs.watch(
+      options.src,
+      { recursive: true },
+      (eventType, filename) => {
+        if (!filename) return;
+        const ext = path.extname(filename).slice(1).toLowerCase();
+        const defaultExts = [
+          'png',
+          'jpg',
+          'jpeg',
+          'svg',
+          'webp',
+          'gif',
+          'ico',
+          'bmp',
+          'tiff',
+        ];
+        const exts = (options.exts || defaultExts).map(e => e.toLowerCase());
+
+        if (exts.includes(ext)) {
+          console.log(
+            `🔄 Detected change in ${filename}, regenerating assets map...`
+          );
+          try {
+            const result = generateAssetsMap(options);
+            console.log(
+              `✅ Assets map updated! Processed ${result.totalFiles} files`
+            );
+            if (callback && typeof callback === 'function') {
+              callback(null, result);
+            }
+          } catch (error) {
+            console.error(`❌ Error regenerating assets map: ${error.message}`);
+            if (callback && typeof callback === 'function') {
+              callback(error, null);
+            }
           }
         }
       }
-    });
-    
+    );
+
     console.log(`👀 Watching ${options.src} for changes...`);
     console.log(`💡 Press Ctrl+C to stop watching`);
-    
+
     return {
       close: () => {
         if (watcher) {
           watcher.close();
-          console.log("🛑 Stopped watching for changes");
+          console.log('🛑 Stopped watching for changes');
         }
-      }
+      },
     };
   } catch (error) {
     throw new Error(`Failed to start file watcher: ${error.message}`);
@@ -200,7 +236,9 @@ function cleanupAssetsMap(outputPath) {
     }
     return false;
   } catch (error) {
-    console.warn(`Warning: Could not cleanup assets map file: ${error.message}`);
+    console.warn(
+      `Warning: Could not cleanup assets map file: ${error.message}`
+    );
     return false;
   }
 }

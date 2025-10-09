@@ -1,0 +1,8 @@
+node_modules/
+lib/
+*.min.js
+*.md
+package-lock.json
+.git/
+.github/
+CHANGELOG.md
