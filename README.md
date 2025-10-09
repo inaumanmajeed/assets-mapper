@@ -2,7 +2,9 @@
 
 🚀 **Auto-generate TypeScript-safe asset maps from your image folders with smart duplicate handling and file watching.**
 
-Perfect for React, Next.js, Vue, and any JavaScript framework. Never deal with broken image paths again!
+Perfect for React, Next.js, Vue, and any JavaScript/TypeScript framework. Never deal with broken image paths again!
+
+> **v2.0.0**: Now built with TypeScript for enhanced type safety and better developer experience!
 
 ## ✨ Features
 
@@ -10,8 +12,10 @@ Perfect for React, Next.js, Vue, and any JavaScript framework. Never deal with b
 - 👀 **File watching** - auto-regenerates when assets change  
 - 🎯 **Smart duplicate handling** - only adds folder prefixes when needed
 - 📦 **Framework agnostic** - works with any JS/TS project
-- 🚀 **TypeScript support** - get autocomplete for your assets
+- 🚀 **Full TypeScript support** - built with TypeScript, includes type definitions
 - 🛠️ **Zero configuration** - works out of the box
+- ⚡ **Fast & reliable** - optimized build pipeline with error handling
+- 🧹 **Auto-cleanup** - removes generated files on uninstall
 
 ## 📦 Installation
 
@@ -23,17 +27,25 @@ npm install assets-mapper
 
 ### CLI Usage
 ```bash
-# Basic usage
+# Basic usage (JavaScript)
 npx assets-mapper --src src/assets --out src/assetsMap.js
+
+# Generate TypeScript file with type definitions
+npx assets-mapper --src src/assets --out src/assetsMap.ts
 
 # With file watching (recommended for development)
 npx assets-mapper --src src/assets --out src/assetsMap.js --watch
 
 # For Next.js public folder
 npx assets-mapper --src public/images --out src/assetsMap.js --public
+
+# TypeScript + watching for development
+npx assets-mapper --src src/assets --out src/assetsMap.ts --watch
 ```
 
 ### Programmatic Usage
+
+**JavaScript:**
 ```javascript
 const { generateAssetsMap } = require('assets-mapper');
 
@@ -42,6 +54,19 @@ const result = generateAssetsMap({
   out: 'src/assetsMap.js'
 });
 
+console.log(`✅ Generated map with ${result.totalFiles} assets`);
+```
+
+**TypeScript:**
+```typescript
+import { generateAssetsMap, GenerateAssetsMapOptions } from 'assets-mapper';
+
+const options: GenerateAssetsMapOptions = {
+  src: 'src/assets',
+  out: 'src/assetsMap.js'
+};
+
+const result = generateAssetsMap(options);
 console.log(`✅ Generated map with ${result.totalFiles} assets`);
 ```
 
@@ -92,6 +117,24 @@ function Header() {
 }
 ```
 
+**TypeScript with full type safety:**
+```tsx
+import assetsMap from './assetsMap.js';
+
+interface HeaderProps {
+  showHero?: boolean;
+}
+
+function Header({ showHero = true }: HeaderProps) {
+  return (
+    <header>
+      <img src={assetsMap.logo} alt="Logo" /> {/* ← Full autocomplete! */}
+      {showHero && <img src={assetsMap.hero} alt="Hero" />}
+    </header>
+  );
+}
+```
+
 ## ⚙️ Options
 
 | Option | Description | Default |
@@ -115,15 +158,25 @@ function Header() {
 ## 🎯 Why Assets Mapper?
 
 - ✅ **No more broken paths** - catch missing assets at build time
-- ✅ **TypeScript autocomplete** - IntelliSense for all your assets  
+- ✅ **Full TypeScript support** - built with TypeScript, includes type definitions
+- ✅ **IntelliSense everywhere** - autocomplete for all your assets  
 - ✅ **Refactor friendly** - rename files without breaking imports
 - ✅ **Tree shaking ready** - only bundle what you use
-- ✅ **Framework agnostic** - works everywhere
+- ✅ **Framework agnostic** - works with React, Next.js, Vue, Svelte, etc.
+- ✅ **Production ready** - robust error handling and optimized builds
+
+## 🆕 What's New in v2.0.0
+
+- **🔥 Full TypeScript Migration**: Complete rewrite in TypeScript with strict type checking
+- **📝 Type Definitions**: Generated `.d.ts` files for perfect IDE integration
+- **⚡ Enhanced Performance**: Optimized build pipeline and error handling
+- **🎨 Code Quality**: Prettier integration with pre-commit hooks
+- **🛡️ Type Safety**: All functions now have proper type annotations
 
 ## 🔧 Requirements
 
 - Node.js 14+ 
-- Works with React, Next.js, Vue, Svelte, and any JS framework
+- Works with React, Next.js, Vue, Svelte, and any JavaScript/TypeScript framework
 
 ## 📝 License
 
