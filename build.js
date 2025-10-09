@@ -2,7 +2,6 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-// Clean lib directory first
 const libDir = path.join(__dirname, 'lib');
 if (fs.existsSync(libDir)) {
   fs.rmSync(libDir, { recursive: true, force: true });
@@ -11,21 +10,35 @@ if (fs.existsSync(libDir)) {
 console.log('🔨 Compiling TypeScript...');
 
 try {
-  // Compile TypeScript to lib
   execSync('npx tsc', { stdio: 'inherit' });
   console.log('✅ TypeScript compiled to lib/');
 
-  // Compile CLI TypeScript file to JavaScript
   const binDir = path.join(__dirname, 'bin');
+  const libBinDir = path.join(libDir, 'bin');
   const cliTsFile = path.join(binDir, 'assets-mapper.ts');
-  const cliJsFile = path.join(binDir, 'assets-mapper.js');
 
   if (fs.existsSync(cliTsFile)) {
+    // Ensure lib/bin directory exists
+    if (!fs.existsSync(libBinDir)) {
+      fs.mkdirSync(libBinDir, { recursive: true });
+    }
+
     execSync(
-      `npx tsc ${cliTsFile} --outDir ${binDir} --target ES2020 --module CommonJS --esModuleInterop --allowSyntheticDefaultImports --skipLibCheck`,
+      `npx tsc ${cliTsFile} --outDir ${libBinDir} --target ES2020 --module CommonJS --esModuleInterop --allowSyntheticDefaultImports --skipLibCheck`,
       { stdio: 'inherit' }
     );
-    console.log('✅ CLI compiled to JavaScript');
+
+    const compiledCliFile = path.join(libBinDir, 'assets-mapper.js');
+    if (fs.existsSync(compiledCliFile)) {
+      let content = fs.readFileSync(compiledCliFile, 'utf8');
+      content = content.replace(
+        /require\(["']\.\.\/lib\/generator\.js["']\)/g,
+        'require("../generator.js")'
+      );
+      fs.writeFileSync(compiledCliFile, content, 'utf8');
+    }
+
+    console.log('✅ CLI compiled to lib/bin/');
   }
 
   // Verify required files exist

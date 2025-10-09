@@ -1,10 +1,15 @@
 # Development files
 src/
+bin/
 build.js
 .github/
 .git/
 .gitignore
 scripts/
+tsconfig*.json
+.prettierrc
+.prettierignore
+.husky/
 
 # Node modules
 node_modules/

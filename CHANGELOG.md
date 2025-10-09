@@ -5,7 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.0] - 2024-10-09
+## [2.0.0] - 2025-10-09
+
+### Added
+- **Full TypeScript Migration**: Complete rewrite in TypeScript with full type safety
+- **Type Definitions**: Generated `.d.ts` files for better IDE support and autocomplete
+- **Enhanced CLI Types**: Strongly typed CLI arguments and error handling
+- **Production Build Pipeline**: Automated TypeScript compilation to optimized JavaScript
+- **Prettier Integration**: Automatic code formatting with pre-commit hooks
+
+### Changed
+- **BREAKING**: Migrated from JavaScript to TypeScript (no API changes, fully backward compatible)
+- **Build Process**: Now compiles TypeScript source to JavaScript in `lib/` directory
+- **Project Structure**: Cleaner separation of source (`src/`) and compiled (`lib/`) code
+- **CLI Location**: Compiled CLI moved to `lib/bin/assets-mapper.js` for cleaner distribution
+
+### Fixed
+- **Type Safety**: All functions now have proper type annotations and error handling
+- **Import Paths**: Resolved module resolution issues in compiled CLI
+- **Build Reliability**: More robust compilation process with better error reporting
+
+## [1.1.0] - 2025-10-09
 
 ### Added
 - **Recursive Directory Scanning**: Now scans subdirectories automatically to find all image assets
@@ -24,18 +44,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Duplicate Detection**: Improved logic for handling duplicate filenames across directories
 - **Path Resolution**: Better handling of relative and absolute paths across different operating systems
 
-## [1.0.2] - 2024-10-09
+## [1.0.2] - 2025-10-09
 
 ### Fixed
 - GitHub Actions deployment pipeline
 - NPM publishing workflow
 
-## [1.0.1] - 2024-10-09
+## [1.0.1] - 2025-10-09
 
 ### Fixed
 - Initial package configuration issues
 
-## [1.0.0] - 2024-10-09
+## [1.0.0] - 2025-10-09
 
 ### Added
 - Initial release as `react-assets-mapper`
