@@ -1,6 +1,6 @@
 {
   "name": "assets-mapper",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "CLI and utility to auto-generate an assets map from a folder for React and Next.js projects with recursive scanning and file watching.",
   "main": "lib/index.js",
   "bin": {
@@ -8,7 +8,8 @@
   },
   "scripts": {
     "build": "node build.js",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "preuninstall": "node -e \"const {cleanupAssetsMap} = require('./lib/generator.js'); const fs = require('fs'); if (fs.existsSync('src/assets-map.js')) cleanupAssetsMap('src/assets-map.js'); if (fs.existsSync('assets-map.js')) cleanupAssetsMap('assets-map.js');\""
   },
   "keywords": [
     "assets",
@@ -37,6 +38,7 @@
     "lib",
     "bin",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "engines": {

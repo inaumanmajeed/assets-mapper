@@ -1,6 +1,7 @@
-const { generateAssetsMap, watchAssetsMap } = require("./generator");
+const { generateAssetsMap, watchAssetsMap, cleanupAssetsMap } = require("./generator");
 
 module.exports = {
   generateAssetsMap,
   watchAssetsMap,
+  cleanupAssetsMap,
 };

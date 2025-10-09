@@ -1,172 +1,134 @@
-# assets-mapper
+# Assets Mapper
 
-Auto-generate a typed assets folder for React/Vite/Next.js projects.
+🚀 **Auto-generate TypeScript-safe asset maps from your image folders with smart duplicate handling and file watching.**
 
-## Features
+Perfect for React, Next.js, Vue, and any JavaScript framework. Never deal with broken image paths again!
 
-- 🚀 **Fast & Simple**: Scans a folder and generates an ES module with all your assets
-- 🎯 **TypeScript Ready**: Generated exports work perfectly with TypeScript
-- 🔧 **Flexible**: Supports both public URL paths and import-based workflows
-- 📦 **Multiple Formats**: Supports all common image formats (png, jpg, jpeg, svg, webp, gif, ico, bmp, tiff)
-- 🛠️ **CLI & API**: Use via command line or programmatically
-- ⚡ **Zero Dependencies** (except for CLI argument parsing)
+## ✨ Features
 
-## Installation
+- 🔍 **Recursive directory scanning** - finds assets in nested folders
+- 👀 **File watching** - auto-regenerates when assets change  
+- 🎯 **Smart duplicate handling** - only adds folder prefixes when needed
+- 📦 **Framework agnostic** - works with any JS/TS project
+- 🚀 **TypeScript support** - get autocomplete for your assets
+- 🛠️ **Zero configuration** - works out of the box
 
-```bash
-npm install --save-dev assets-mapper
-```
-
-## CLI Usage
-
-### Basic Usage
+## 📦 Installation
 
 ```bash
-# For Next.js projects (public directory)
-npx assets-mapper --src ./public/assets --out ./src/assetsMap.js --public
-
-# For bundler-based projects (Vite, Webpack, etc.)
-npx assets-mapper --src ./src/assets --out ./src/assetsMap.js
+npm install assets-mapper
 ```
 
-### Options
+## 🚀 Quick Start
 
-| Option       | Description                                       | Required | Default                                  |
-| ------------ | ------------------------------------------------- | -------- | ---------------------------------------- |
-| `--src`      | Source directory containing image assets          | ✅       | -                                        |
-| `--out`      | Output file path for the generated map            | ✅       | -                                        |
-| `--public`   | Generate public URLs instead of import statements | ❌       | `false`                                  |
-| `--exts`     | Comma-separated list of file extensions           | ❌       | `png,jpg,jpeg,svg,webp,gif,ico,bmp,tiff` |
-| `--help, -h` | Show help message                                 | ❌       | -                                        |
-
-### Examples
-
+### CLI Usage
 ```bash
-# Custom file extensions
-npx assets-mapper --src ./assets --out ./src/images.js --exts png,svg,jpg
+# Basic usage
+npx assets-mapper --src src/assets --out src/assetsMap.js
 
-# Help
-npx assets-mapper --help
+# With file watching (recommended for development)
+npx assets-mapper --src src/assets --out src/assetsMap.js --watch
+
+# For Next.js public folder
+npx assets-mapper --src public/images --out src/assetsMap.js --public
 ```
 
-## Programmatic API
+### Programmatic Usage
+```javascript
+const { generateAssetsMap } = require('assets-mapper');
 
-```js
-const { generateAssetsMap } = require("react-assets-mapper");
+const result = generateAssetsMap({
+  src: 'src/assets',
+  out: 'src/assetsMap.js'
+});
 
-try {
-  const result = generateAssetsMap({
-    src: "./public/assets",
-    out: "./src/assetsMap.js",
-    public: true,
-    exts: ["png", "jpg", "svg"], // optional
-  });
-
-  console.log(`Generated ${result.totalFiles} asset exports`);
-} catch (error) {
-  console.error("Error:", error.message);
-}
+console.log(`✅ Generated map with ${result.totalFiles} assets`);
 ```
 
-### API Options
+## 📁 Example
 
-| Option   | Type       | Description                     | Default                                                      |
-| -------- | ---------- | ------------------------------- | ------------------------------------------------------------ |
-| `src`    | `string`   | Source directory path           | -                                                            |
-| `out`    | `string`   | Output file path                | -                                                            |
-| `public` | `boolean`  | Generate public URLs vs imports | `false`                                                      |
-| `exts`   | `string[]` | File extensions to include      | `['png','jpg','jpeg','svg','webp','gif','ico','bmp','tiff']` |
-
-### Return Value
-
-```js
-{
-  outputFile: string,        // Path to generated file
-  processedFiles: string[],  // List of processed files
-  totalFiles: number,        // Count of processed files
-  skippedFiles: number       // Count of skipped files
-}
+**Your folder structure:**
+```
+src/assets/
+├── logo.png
+├── hero.jpg
+├── icons/
+│   ├── home.svg
+│   └── logo.png    # duplicate filename
+└── images/
+    └── banner.webp
 ```
 
-## Generated Output Examples
-
-### Public Mode (Next.js)
-
-```js
-export const logo = "/assets/logo.png";
-export const heroImage = "/assets/hero-image.jpg";
-export const iconSvg = "/assets/icon.svg";
-
-const assetsMap = {
-  logo,
-  heroImage,
-  iconSvg,
-};
-
-export default assetsMap;
-```
-
-### Import Mode (Vite/Webpack)
-
-```js
+**Generated `assetsMap.js`:**
+```javascript
 import logo from "./assets/logo.png";
-import heroImage from "./assets/hero-image.jpg";
-import iconSvg from "./assets/icon.svg";
+import hero from "./assets/hero.jpg"; 
+import home from "./assets/icons/home.svg";
+import icons_logo from "./assets/icons/logo.png";  // ← smart prefix for duplicate
+import banner from "./assets/images/banner.webp";
 
 const assetsMap = {
   logo,
-  heroImage,
-  iconSvg,
+  hero,
+  home,
+  icons_logo,
+  banner
 };
 
 export default assetsMap;
 ```
 
-## Usage in Components
-
+**Use in your components:**
 ```jsx
-import assetsMap, { logo, heroImage } from "./assetsMap.js";
+import assetsMap from './assetsMap.js';
 
-function MyComponent() {
+function Header() {
   return (
-    <div>
-      <img src={logo} alt="Logo" />
-      <img src={heroImage} alt="Hero" />
-      {/* Or use the default export */}
-      <img src={assetsMap.iconSvg} alt="Icon" />
-    </div>
+    <header>
+      <img src={assetsMap.logo} alt="Logo" />
+      <img src={assetsMap.hero} alt="Hero" />
+    </header>
   );
 }
 ```
 
-## Development
+## ⚙️ Options
 
-```bash
-# Install dependencies
-npm install
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--src` | Source directory | Required |
+| `--out` | Output file path | Required |
+| `--watch` | Watch for changes | `false` |
+| `--public` | Use public folder paths | `false` |
+| `--exts` | File extensions | `png,jpg,jpeg,svg,webp,gif,ico` |
 
-# Build
-npm run build
-```
+## 🧠 Smart Features
 
-## 🚀 Auto-Deployment
+**Duplicate Handling**: Only adds folder prefixes when filenames actually conflict:
+- `logo.png` → `logo` (simple name)
+- `icons/logo.png` → `icons_logo` (prefixed due to conflict)
 
-This package uses GitHub Actions for automatic deployment to npm:
+**Auto-cleanup**: Removes generated files when package is uninstalled.
 
-- **Automatic**: Every push to `main` branch triggers deployment
-- **Version Management**: Auto-bumps version if unchanged
-- **Quality Checks**: Runs tests and validation before deployment
-- **Skip Option**: Add `[skip deploy]` to commit message to skip
+**File Watching**: Automatically regenerates when you add/remove/rename assets.
 
-## Contributing
+## 🎯 Why Assets Mapper?
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes and test them
-4. Commit: `git commit -m "feat: description"`
-5. Push to your fork: `git push origin feature-name`
-6. Create a Pull Request
+- ✅ **No more broken paths** - catch missing assets at build time
+- ✅ **TypeScript autocomplete** - IntelliSense for all your assets  
+- ✅ **Refactor friendly** - rename files without breaking imports
+- ✅ **Tree shaking ready** - only bundle what you use
+- ✅ **Framework agnostic** - works everywhere
 
-## License
+## 🔧 Requirements
 
-MIT © [inaumanmajeed](https://github.com/inaumanmajeed)
+- Node.js 14+ 
+- Works with React, Next.js, Vue, Svelte, and any JS framework
+
+## 📝 License
+
+MIT - see [LICENSE](LICENSE) for details.
+
+---
+
+**Made with ❤️ for developers who hate broken image paths**

@@ -58,33 +58,32 @@ try {
   console.log(`✅ Assets map generated successfully!`);
   console.log(`   Output: ${result.outputFile}`);
   console.log(`   Processed: ${result.totalFiles} files`);
-  
+
   if (result.directories.length > 0) {
-    console.log(`   Directories: ${result.directories.join(', ')}`);
+    console.log(`   Directories: ${result.directories.join(", ")}`);
   }
-  
+
   if (result.skippedFiles > 0) {
     console.log(`   Skipped: ${result.skippedFiles} files`);
   }
 
   // Start watching if requested
   if (args.watch || args.w) {
-    console.log('');
+    console.log("");
     const watcher = watchAssetsMap(options);
-    
+
     // Handle graceful shutdown
-    process.on('SIGINT', () => {
-      console.log('\n👋 Shutting down...');
+    process.on("SIGINT", () => {
+      console.log("\n👋 Shutting down...");
       watcher.close();
       process.exit(0);
     });
-    
-    process.on('SIGTERM', () => {
+
+    process.on("SIGTERM", () => {
       watcher.close();
       process.exit(0);
     });
   }
-  
 } catch (error) {
   console.error("❌ Error:", error.message);
   process.exit(1);
