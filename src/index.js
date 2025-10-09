@@ -1,3 +1,4 @@
+// Main module exports for assets-mapper
 const {
   generateAssetsMap,
   watchAssetsMap,
