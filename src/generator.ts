@@ -116,11 +116,7 @@ export function generateAssetsMap(
     );
   }
 
-  // Find duplicates by filename (without extension)
-  const nameCount: { [key: string]: number } = {};
-  imageFiles.forEach(file => {
-    nameCount[file.name] = (nameCount[file.name] || 0) + 1;
-  });
+  const nameUsageCount: { [key: string]: number } = {};
 
   const lines: string[] = [];
   const mapEntries: string[] = [];
@@ -128,22 +124,23 @@ export function generateAssetsMap(
 
   imageFiles.forEach(fileInfo => {
     let exportName: string;
+    const baseName = sanitizeName(fileInfo.name);
 
-    // Only add folder prefix if there are duplicates
-    if (nameCount[fileInfo.name] > 1) {
+    nameUsageCount[baseName] = (nameUsageCount[baseName] || 0) + 1;
+
+    if (nameUsageCount[baseName] === 1) {
+      exportName = baseName;
+    } else {
       const dir = fileInfo.directory;
       if (dir && dir !== '.') {
         const dirParts = dir.split(path.sep).filter(part => part !== '.');
         const dirName = dirParts.join('_');
         exportName = sanitizeName(`${dirName}_${fileInfo.name}`);
       } else {
-        exportName = sanitizeName(fileInfo.name);
+        exportName = baseName;
       }
-    } else {
-      exportName = sanitizeName(fileInfo.name);
     }
 
-    // Handle edge case where sanitization creates duplicates
     let counter = 1;
     const originalName = exportName;
     while (exportNames.has(exportName)) {
@@ -202,8 +199,8 @@ export function generateAssetsMap(
     directories: [
       ...new Set(imageFiles.map(f => f.directory).filter(d => d !== '.')),
     ],
-    duplicates: Object.keys(nameCount).filter(
-      name => nameCount[name] && nameCount[name] > 1
+    duplicates: Object.keys(nameUsageCount).filter(
+      name => nameUsageCount[name] && nameUsageCount[name] > 1
     ),
   };
 }
