@@ -1,0 +1,21 @@
+# Code ownership rules
+# Each file or folder is owned by the specified person/team
+# They will be automatically requested for PR reviews
+
+# Project maintainers
+* @inaumanmajeed
+
+# Core files
+/src/** @inaumanmajeed
+/bin/** @inaumanmajeed
+/tests/** @inaumanmajeed
+
+# Configuration and build
+/package.json @inaumanmajeed
+/tsconfig*.json @inaumanmajeed
+/jest.config.js @inaumanmajeed
+build.js @inaumanmajeed
+
+# Documentation
+README.md @inaumanmajeed
+CHANGELOG.md @inaumanmajeed

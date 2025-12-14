@@ -1,0 +1,29 @@
+#!/bin/sh
+# Prevent force pushing to main and dev branches
+
+while read local_ref local_sha remote_ref remote_sha; do
+  if [ "$local_sha" = "0000000000000000000000000000000000000000" ]; then
+    # Handle delete
+    continue
+  fi
+
+  # Get the branch name
+  branch=$(echo "$remote_ref" | sed 's/refs\/heads\///')
+  
+  # Check if force push
+  if [ -z "$remote_sha" ] || [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+    # New branch, allow
+    continue
+  fi
+
+  # Check if it's a force push
+  if ! git merge-base --is-ancestor "$remote_sha" "$local_sha"; then
+    if [ "$branch" = "main" ] || [ "$branch" = "dev" ]; then
+      echo "❌ Force push to $branch is not allowed!"
+      echo "Please use 'git pull' to sync first, then push normally."
+      exit 1
+    fi
+  fi
+done
+
+exit 0
