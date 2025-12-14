@@ -39,7 +39,7 @@
   },
   "homepage": "https://github.com/inaumanmajeed/assets-mapper#readme",
   "dependencies": {
-    "minimatch": "^9.0.5",
+    "minimatch": "^8.0.0",
     "minimist": "^1.2.8"
   },
   "files": [
