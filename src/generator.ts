@@ -1,8 +1,43 @@
 import fs from 'fs';
 import path from 'path';
+import { minimatch } from 'minimatch';
 
 export function sanitizeName(name: string): string {
   return name.replace(/[^a-zA-Z0-9_]/g, '_').replace(/^([0-9])/, '_$1');
+}
+
+export function toCamelCase(str: string): string {
+  return str
+    .replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase())
+    .replace(/^[A-Z]/, chr => chr.toLowerCase())
+    .replace(/^([0-9])/, '_$1');
+}
+
+export function toSnakeCase(str: string): string {
+  return str
+    .replace(/[^a-zA-Z0-9]+/g, '_')
+    .toLowerCase()
+    .replace(/^([0-9])/, '_$1');
+}
+
+export function toKebabCase(str: string): string {
+  return str.replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase();
+}
+
+export function applyNamingStrategy(
+  name: string,
+  strategy?: 'camelCase' | 'snake_case' | 'kebab-case'
+): string {
+  switch (strategy) {
+    case 'camelCase':
+      return toCamelCase(name);
+    case 'snake_case':
+      return toSnakeCase(name);
+    case 'kebab-case':
+      return toKebabCase(name);
+    default:
+      return sanitizeName(name);
+  }
 }
 
 export interface AssetFile {
@@ -16,20 +51,40 @@ export interface AssetFile {
 export function scanDirectoryRecursive(
   dir: string,
   exts: string[],
-  baseDir: string
+  baseDir: string,
+  exclude?: string[],
+  include?: string[]
 ): AssetFile[] {
   const results: AssetFile[] = [];
   try {
     const items = fs.readdirSync(dir);
     for (const item of items) {
       const fullPath = path.join(dir, item);
+      const relativePath = path.relative(baseDir, fullPath);
+
+      if (
+        exclude &&
+        exclude.some(pattern => minimatch(relativePath, pattern))
+      ) {
+        continue;
+      }
+
       const stats = fs.statSync(fullPath);
       if (stats.isDirectory()) {
-        results.push(...scanDirectoryRecursive(fullPath, exts, baseDir));
+        results.push(
+          ...scanDirectoryRecursive(fullPath, exts, baseDir, exclude, include)
+        );
       } else if (stats.isFile()) {
+        if (
+          include &&
+          include.length > 0 &&
+          !include.some(pattern => minimatch(relativePath, pattern))
+        ) {
+          continue;
+        }
+
         const ext = path.extname(item).slice(1).toLowerCase();
         if (exts.includes(ext)) {
-          const relativePath = path.relative(baseDir, fullPath);
           results.push({
             fullPath,
             relativePath,
@@ -57,6 +112,10 @@ export interface GenerateAssetsMapOptions {
   out: string;
   public?: boolean;
   exts?: string[];
+  exclude?: string[];
+  include?: string[];
+  namingStrategy?: 'camelCase' | 'snake_case' | 'kebab-case';
+  prefixStrategy?: 'folder' | 'path' | 'hash';
 }
 
 export interface GenerateAssetsMapResult {
@@ -105,8 +164,17 @@ export function generateAssetsMap(
     'tiff',
   ];
   const exts = (options.exts || defaultExts).map(e => e.toLowerCase());
+  const exclude = options.exclude || ['**/node_modules/**', '**/.git/**'];
+  const include = options.include;
 
-  const imageFiles = scanDirectoryRecursive(src, exts, src);
+  const imageFiles = scanDirectoryRecursive(src, exts, src, exclude, include);
+
+  imageFiles.sort((a, b) => {
+    const depthA = a.directory.split(path.sep).filter(p => p !== '.').length;
+    const depthB = b.directory.split(path.sep).filter(p => p !== '.').length;
+    if (depthA !== depthB) return depthA - depthB;
+    return a.relativePath.localeCompare(b.relativePath);
+  });
 
   if (imageFiles.length === 0) {
     console.warn(
@@ -116,11 +184,7 @@ export function generateAssetsMap(
     );
   }
 
-  // Find duplicates by filename (without extension)
-  const nameCount: { [key: string]: number } = {};
-  imageFiles.forEach(file => {
-    nameCount[file.name] = (nameCount[file.name] || 0) + 1;
-  });
+  const nameUsageCount: { [key: string]: number } = {};
 
   const lines: string[] = [];
   const mapEntries: string[] = [];
@@ -128,22 +192,43 @@ export function generateAssetsMap(
 
   imageFiles.forEach(fileInfo => {
     let exportName: string;
+    const baseName = applyNamingStrategy(fileInfo.name, options.namingStrategy);
 
-    // Only add folder prefix if there are duplicates
-    if (nameCount[fileInfo.name] > 1) {
+    nameUsageCount[baseName] = (nameUsageCount[baseName] || 0) + 1;
+
+    if (nameUsageCount[baseName] === 1) {
+      exportName = baseName;
+    } else {
       const dir = fileInfo.directory;
       if (dir && dir !== '.') {
         const dirParts = dir.split(path.sep).filter(part => part !== '.');
-        const dirName = dirParts.join('_');
-        exportName = sanitizeName(`${dirName}_${fileInfo.name}`);
+
+        if (options.prefixStrategy === 'path') {
+          exportName = applyNamingStrategy(
+            `${dirParts.join('_')}_${fileInfo.name}`,
+            options.namingStrategy
+          );
+        } else if (options.prefixStrategy === 'hash') {
+          const hash = Buffer.from(fileInfo.relativePath)
+            .toString('base64')
+            .slice(0, 8)
+            .replace(/[^a-zA-Z0-9]/g, '');
+          exportName = applyNamingStrategy(
+            `${fileInfo.name}_${hash}`,
+            options.namingStrategy
+          );
+        } else {
+          const dirName = dirParts[dirParts.length - 1] || dirParts.join('_');
+          exportName = applyNamingStrategy(
+            `${dirName}_${fileInfo.name}`,
+            options.namingStrategy
+          );
+        }
       } else {
-        exportName = sanitizeName(fileInfo.name);
+        exportName = baseName;
       }
-    } else {
-      exportName = sanitizeName(fileInfo.name);
     }
 
-    // Handle edge case where sanitization creates duplicates
     let counter = 1;
     const originalName = exportName;
     while (exportNames.has(exportName)) {
@@ -202,8 +287,8 @@ export function generateAssetsMap(
     directories: [
       ...new Set(imageFiles.map(f => f.directory).filter(d => d !== '.')),
     ],
-    duplicates: Object.keys(nameCount).filter(
-      name => nameCount[name] && nameCount[name] > 1
+    duplicates: Object.keys(nameUsageCount).filter(
+      name => nameUsageCount[name] && nameUsageCount[name] > 1
     ),
   };
 }

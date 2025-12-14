@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2025-12-14
+
+### Added
+- **Config File Support**: `assets-mapper.config.js` for project-level defaults
+- **Naming Strategies**: camelCase, snake_case, or kebab-case for export names
+- **Exclude Patterns**: Glob pattern support (defaults: `**/node_modules/**`, `**/.git/**`)
+- **Include Patterns**: Optionally specify which files to include using glob patterns
+- **Prefix Strategies**: folder, path, or hash for duplicate naming
+- **CLI Enhancements**: `--init`, `--dry-run`, `--stats` commands
+- **Testing Infrastructure**: Complete Jest test suite with 21+ tests
+- **New Utility Functions**: `toCamelCase`, `toSnakeCase`, `toKebabCase`, `applyNamingStrategy`
+
+### Changed
+- File sorting by directory depth for consistent ordering
+- Default excludes for `node_modules` and `.git` directories
+- Enhanced CLI help with new options and examples
+
+### Fixed
+- **Critical**: Duplicate handling now preserves first occurrence names
+- Include pattern logic correctly applies only to files, not directories
+
+## [2.0.2] - 2025-12-14
+
+### Fixed
+- **Duplicate Handling**: Fixed critical bug where duplicate filenames would rename ALL occurrences, breaking existing component references
+- **Smart Renaming**: Now only the second and subsequent duplicates get folder prefixes, preserving the first occurrence with its simple name
+- **Example**: If `logo.png` exists in two folders, the first keeps name `logo`, only the second becomes `folder_logo`
+
 ## [2.0.1] - 2025-10-09
 
 ### Changed

@@ -1,7 +1,7 @@
 {
   "name": "assets-mapper",
-  "version": "2.0.1",
-  "description": "CLI and utility to auto-generate an assets map from a folder for React and Next.js projects with recursive scanning and file watching.",
+  "version": "2.1.0",
+  "description": "CLI and utility to auto-generate an assets map from a folder for React and Next.js projects with recursive scanning, file watching, and advanced configuration.",
   "main": "lib/index.js",
   "bin": {
     "assets-mapper": "lib/bin/assets-mapper.js"
@@ -11,6 +11,9 @@
     "format": "prettier --write \"src/**/*.ts\" \"bin/**/*.ts\" \"*.js\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"bin/**/*.ts\" \"*.js\"",
     "type-check": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "prepublishOnly": "npm run build",
     "preuninstall": "node -e \"const {cleanupAssetsMap} = require('./lib/generator.js'); const fs = require('fs'); if (fs.existsSync('src/assets-map.js')) cleanupAssetsMap('src/assets-map.js'); if (fs.existsSync('assets-map.js')) cleanupAssetsMap('assets-map.js');\"",
     "prepare": "husky"
@@ -36,6 +39,7 @@
   },
   "homepage": "https://github.com/inaumanmajeed/assets-mapper#readme",
   "dependencies": {
+    "minimatch": "^9.0.5",
     "minimist": "^1.2.8"
   },
   "files": [
@@ -53,11 +57,16 @@
     ]
   },
   "devDependencies": {
+    "@jest/globals": "^30.2.0",
+    "@types/jest": "^30.0.0",
+    "@types/minimatch": "^5.1.2",
     "@types/minimist": "^1.2.5",
     "@types/node": "^24.7.0",
     "husky": "^9.1.7",
+    "jest": "^30.2.0",
     "lint-staged": "^16.2.3",
     "prettier": "^3.6.2",
+    "ts-jest": "^29.4.6",
     "typescript": "^5.9.3"
   }
 }
