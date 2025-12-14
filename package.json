@@ -1,6 +1,6 @@
 {
   "name": "assets-mapper",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "CLI and utility to auto-generate an assets map from a folder for React and Next.js projects with recursive scanning, file watching, and advanced configuration.",
   "main": "lib/index.js",
   "bin": {

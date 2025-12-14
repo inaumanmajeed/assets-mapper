@@ -4,7 +4,7 @@
 
 Perfect for React, Next.js, Vue, and any JavaScript/TypeScript framework. Never deal with broken image paths again!
 
-> **v2.1.0**: Major feature release with config file support, naming strategies, exclude/include patterns, and comprehensive testing!
+> **v2.1.1**: Documentation improvements and stability fixes. **v2.1.0**: Major feature release with config file support, naming strategies, exclude/include patterns, and comprehensive testing!
 
 ## ✨ Features
 
@@ -29,35 +29,9 @@ npm install assets-mapper
 
 ## 🚀 Quick Start
 
-### CLI Usage
-```bash
-# Basic usage (JavaScript)
-npx assets-mapper --src src/assets --out src/assetsMap.js
+### 💡 Recommended: Using Config File
 
-# Generate TypeScript file with type definitions
-npx assets-mapper --src src/assets --out src/assetsMap.ts
-
-# With file watching (recommended for development)
-npx assets-mapper --src src/assets --out src/assetsMap.js --watch
-
-# For Next.js public folder
-npx assets-mapper --src public/images --out src/assetsMap.js --public
-
-# With naming strategy
-npx assets-mapper --src src/assets --out src/assetsMap.js --naming camelCase
-
-# With exclude patterns
-npx assets-mapper --src src/assets --out src/map.js --exclude '**/test/**,**/temp/**'
-
-# Create config file
-npx assets-mapper init
-
-# With stats
-npx assets-mapper --src src/assets --out src/map.js --stats
-```
-
-### Config File (Recommended)
-Create `assets-mapper.config.js` in your project root:
+**Create `assets-mapper.config.js` in your project root:**
 
 ```javascript
 export default {
@@ -65,15 +39,68 @@ export default {
   out: './src/assetsMap.ts',
   public: false,
   exts: ['png', 'jpg', 'jpeg', 'svg', 'webp', 'gif'],
-  exclude: ['**/node_modules/**', '**/.git/**', '**/test/**'],
+  exclude: ['**/node_modules/**', '**/.git/**'],
   namingStrategy: 'camelCase',
   prefixStrategy: 'folder'
 };
 ```
 
-Then simply run:
+**Then simply run:**
 ```bash
 npx assets-mapper
+```
+
+Or with watching enabled:
+```bash
+npx assets-mapper --watch
+```
+
+---
+
+### CLI Usage
+
+#### Basic Commands
+```bash
+# Generate assets map
+npx assets-mapper --src src/assets --out src/assetsMap.js
+
+# With TypeScript
+npx assets-mapper --src src/assets --out src/assetsMap.ts
+
+# Watch mode (auto-regenerate on changes)
+npx assets-mapper --src src/assets --out src/assetsMap.js --watch
+
+# Create config file interactively
+npx assets-mapper init
+
+# Preview changes without writing
+npx assets-mapper --dry-run
+
+# Show detailed statistics
+npx assets-mapper --stats
+```
+
+#### Advanced Options
+```bash
+# Custom naming strategy
+npx assets-mapper --src src/assets --out map.js --naming camelCase
+# Options: default | camelCase | snake_case | kebab-case
+
+# Exclude patterns
+npx assets-mapper --src src/assets --out map.js --exclude '**/test/**,**/temp/**'
+
+# Include only specific patterns
+npx assets-mapper --src src/assets --out map.js --include '**/icons/**,**/images/**'
+
+# For Next.js public folder
+npx assets-mapper --src public/images --out src/assetsMap.js --public
+
+# Custom prefix strategy for duplicates
+npx assets-mapper --src src/assets --out map.js --prefix path
+# Options: folder (default) | path | hash
+
+# Combine multiple options
+npx assets-mapper --src src/assets --out map.ts --naming camelCase --prefix hash --watch
 ```
 
 ### Programmatic Usage
