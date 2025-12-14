@@ -226,8 +226,6 @@ interface AssetsMapperConfig {
 
 **Config File Support**: Set defaults once, use everywhere in your project.
 
-**File Watching**: Automatically regenerates when you add/remove/rename assets.
-
 ## 🎯 Why Assets Mapper?
 
 - ✅ **No more broken paths** - catch missing assets at build time
@@ -242,15 +240,53 @@ interface AssetsMapperConfig {
 
 ## 🆕 What's New in v2.1.0
 
-- **🎨 Naming Strategies**: Choose camelCase, snake_case, or kebab-case for exports
-- **📝 Config File Support**: Create `assets-mapper.config.js` for project defaults
-- **🚫 Exclude/Include Patterns**: Fine-grained control with glob patterns
-- **🎯 Prefix Strategies**: Choose how duplicates are named (folder, path, or hash)
-- **🧪 Full Test Coverage**: Comprehensive Jest test suite
-- **📊 Stats Mode**: Detailed statistics about your assets
-- **🔍 Dry Run**: Preview changes before writing files
-- **⚡ Performance**: Optimized file scanning and sorting
-- **🐛 Bug Fixes**: Fixed duplicate handling to preserve first occurrence names
+- 🎨 **Naming Strategies** - camelCase, snake_case, or kebab-case for exports
+- 📝 **Config File Support** - `assets-mapper.config.js` for project defaults
+- 🚫 **Exclude/Include Patterns** - glob pattern support for fine-grained control
+- 🎯 **Prefix Strategies** - folder, path, or hash for duplicate naming
+- 🧪 **Full Test Coverage** - comprehensive Jest test suite
+- 📊 **CLI Enhancements** - `--init`, `--dry-run`, `--stats` commands
+- 🐛 **Bug Fixes** - duplicate handling preserves first occurrence names
+
+## 📚 API
+
+### generateAssetsMap(options)
+
+Generates the assets map file.
+
+```typescript
+interface GenerateAssetsMapOptions {
+  src: string;
+  out: string;
+  public?: boolean;
+  exts?: string[];
+  exclude?: string[];
+  include?: string[];
+  namingStrategy?: 'camelCase' | 'snake_case' | 'kebab-case';
+  prefixStrategy?: 'folder' | 'path' | 'hash';
+}
+
+interface GenerateAssetsMapResult {
+  outputFile: string;
+  processedFiles: string[];
+  totalFiles: number;
+  directories: string[];
+  duplicates: string[];
+}
+```
+
+### watchAssetsMap(options, callback?)
+
+Watch mode for automatic regeneration.
+
+```typescript
+const watcher = watchAssetsMap({
+  src: 'src/assets',
+  out: 'src/assetsMap.js'
+});
+
+// Later: watcher.close();
+```
 
 ## 🔧 Requirements
 

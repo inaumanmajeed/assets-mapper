@@ -18,10 +18,16 @@ node_modules/
 tests/
 test/
 *.test.js
+*.test.ts
 jest.config.js
+coverage/
+
+# Config examples
+*.example.js
+*.example.ts
 
 # Documentation files not needed in package
-
+assets-mapper.config.example.js
 
 # Environment and IDE files
 .env*
@@ -40,3 +46,8 @@ yarn-error.log*
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

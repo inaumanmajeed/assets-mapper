@@ -8,31 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.1.0] - 2025-12-14
 
 ### Added
-- **Config File Support**: Create `assets-mapper.config.js` for project-level defaults
-- **Naming Strategies**: Choose between camelCase, snake_case, or kebab-case for export names
-- **Exclude Patterns**: Glob pattern support to exclude specific files/folders (defaults: `**/node_modules/**`, `**/.git/**`)
+- **Config File Support**: `assets-mapper.config.js` for project-level defaults
+- **Naming Strategies**: camelCase, snake_case, or kebab-case for export names
+- **Exclude Patterns**: Glob pattern support (defaults: `**/node_modules/**`, `**/.git/**`)
 - **Include Patterns**: Optionally specify which files to include using glob patterns
-- **Prefix Strategies**: Choose how duplicates are prefixed (folder, path, or hash)
-- **CLI Enhancements**:
-  - `--init` flag to create config file interactively
-  - `--dry-run` flag to preview changes without writing
-  - `--stats` flag to show detailed asset statistics
-  - `--naming` flag for naming strategy selection
-  - `--prefix` flag for duplicate prefix strategy
-  - `--exclude` and `--include` flags for pattern filtering
+- **Prefix Strategies**: folder, path, or hash for duplicate naming
+- **CLI Enhancements**: `--init`, `--dry-run`, `--stats` commands
 - **Testing Infrastructure**: Complete Jest test suite with 21+ tests
 - **New Utility Functions**: `toCamelCase`, `toSnakeCase`, `toKebabCase`, `applyNamingStrategy`
-- **Better Exports**: Export config utilities and naming functions for programmatic use
 
 ### Changed
-- **File Sorting**: Images now sorted by directory depth first, then alphabetically for consistent ordering
-- **Default Excludes**: Automatically exclude `node_modules` and `.git` directories
-- **CLI Help**: Enhanced help message with new options and config file examples
-- **Documentation**: Comprehensive README updates with all new features
+- File sorting by directory depth for consistent ordering
+- Default excludes for `node_modules` and `.git` directories
+- Enhanced CLI help with new options and examples
 
 ### Fixed
-- **Duplicate Handling**: Critical bug where ALL duplicate filenames were renamed, breaking existing references
-- **Include Pattern Logic**: Include patterns now correctly apply only to files, not directories
+- **Critical**: Duplicate handling now preserves first occurrence names
+- Include pattern logic correctly applies only to files, not directories
 
 ## [2.0.2] - 2025-12-14
 
