@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2025-12-18
+
+### Changed
+- **Package Size Optimization**: Reduced from 44.6 kB to 5.3 kB (88% reduction) 🎉
+- **Build Process**: Added aggressive JavaScript minification (removes comments, console statements, whitespace)
+- **Distribution**: Removed TypeScript declaration files (.d.ts) from published package
+- **Dependencies**: Cleaned up devDependencies - kept only TypeScript and essential type definitions
+- **CI/CD**: Simplified test workflow to type-check and build only
+- **Documentation**: Minimal README and LICENSE in package (full docs on GitHub)
+
+### Removed
+- Test files and Jest dependencies from package
+- Prettier and code formatting tools
+- Husky and lint-staged hooks
+- Unnecessary preuninstall script
+- TypeScript declaration files from distribution
+
+### Maintained
+- ✅ Full CLI functionality (generate, watch, cleanup commands)
+- ✅ Programmatic API with all utilities
+- ✅ TypeScript support with proper types
+- ✅ All configuration options
+- ✅ Multi-node version support (18.x, 20.x)
+
 ## [2.1.1] - 2025-12-14
 
 ### Changed
