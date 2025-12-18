@@ -42,9 +42,9 @@
     "node": ">=18.0.0"
   },
   "devDependencies": {
-    "@jest/globals": "^29.7.0",
     "@types/node": "^24.7.0",
     "@types/minimatch": "^5.1.2",
-    "@types/minimist": "^1.2.9.3"
+    "@types/minimist": "^1.2.5",
+    "typescript": "^5.9.3"
   }
 }
