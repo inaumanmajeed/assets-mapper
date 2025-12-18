@@ -9,8 +9,7 @@
   "scripts": {
     "build": "node build.js",
     "type-check": "tsc --noEmit",
-    "prepublishOnly": "npm run build",
-    "preuninstall": "node -e \"const {cleanupAssetsMap} = require('./lib/generator.js'); const fs = require('fs'); if (fs.existsSync('src/assets-map.js')) cleanupAssetsMap('src/assets-map.js'); if (fs.existsSync('assets-map.js')) cleanupAssetsMap('assets-map.js');\""
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "assets",
@@ -44,15 +43,8 @@
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
-    "@types/jest": "^29.5.0",
-    "@types/minimatch": "^5.1.2",
-    "@types/minimist": "^1.2.5",
     "@types/node": "^24.7.0",
-    "husky": "^9.1.7",
-    "jest": "^29.7.0",
-    "lint-staged": "^16.2.3",
-    "prettier": "^3.6.2",
-    "ts-jest": "^29.1.5",
-    "typescript": "^5.9.3"
+    "@types/minimatch": "^5.1.2",
+    "@types/minimist": "^1.2.9.3"
   }
 }
