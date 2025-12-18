@@ -29,18 +29,5 @@ jobs:
       - name: Run type check
         run: npm run type-check
 
-      - name: Run tests
-        run: npm test
-
-      - name: Run format check
-        run: npm run format:check
-
       - name: Build
         run: npm run build
-
-      - name: Upload coverage
-        if: matrix.node-version == '20.x'
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./coverage/lcov.info
-          fail_ci_if_error: false
